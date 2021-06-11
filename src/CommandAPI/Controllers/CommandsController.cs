@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using CommandAPI.Data;
+using CommandAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CommandAPI.Controllers
@@ -7,20 +9,43 @@ namespace CommandAPI.Controllers
     [Route("[controller]")]
     public class CommandsController : ControllerBase
     {
-
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
+        private readonly ICommandAPIRepo repo;
+        public CommandsController(ICommandAPIRepo _repo)
         {
-            var a = new List<string>();
-            a.Add("Buğra");
-            a.Add("Kerem");
-            a.Add("Arda");
-            a.Add("Uğur");
-            return a;
-
-
-
+            this.repo = _repo;
         }
+        [HttpGet]
+        public ActionResult<IEnumerable<Command>> Get()
+        {
+            var commands =   repo.GetAllCommands();
+            return Ok(commands);
+        }
+        [HttpGet("{ID}")]
+        public ActionResult<Command> Get(int ID)
+        {
+            var command = repo.GetCommandById(ID);
+            if (command == null)
+            {
+                return NotFound();
+            }
+            return Ok(command);
+        }
+
+        [HttpPost]
+        public ActionResult Post([FromBody] Command command)
+        {
+            repo.CreateCommand(command);
+            return Ok();
+        }
+        [HttpDelete("{ID}")]
+        public ActionResult Delete(int ID)
+        {
+            var cmd = repo.GetCommandById(ID);
+            repo.DeleteCommand(cmd);
+            return Ok();
+        }
+
+
     }
 
 
